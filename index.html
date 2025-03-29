@@ -108,15 +108,20 @@
             entryCount = 0;
         }
 
-        function handleDateChange() {
-            const newDate = document.getElementById("date").value;
-            if (newDate !== currentDate) {
-                entryCount = 0;
-                currentDate = newDate;
-                dataRows = [];
-                document.getElementById("dataTable").innerHTML = '';
-            }
-        }
+       function handleDateChange() {
+    const newDate = document.getElementById("date").value;
+    if (newDate !== currentDate) {
+        entryCount = 0;
+        currentDate = newDate;
+        dataRows = [];
+        document.getElementById("dataTable").innerHTML = '';
+    }
+    
+    // Scroll to the last row in the table
+    const tableContainer = document.getElementById("tableContainer");
+    tableContainer.scrollTop = tableContainer.scrollHeight;
+}
+
 
 
         let siteData = {
