@@ -15255,15 +15255,57 @@
         }
 
         function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const foName = document.getElementById("fo_name").value || "Beat_Plan";
-            const doc = new jsPDF();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    let foName = document.getElementById("fo_name").value || "Beat_Plan";
+    let title = `Beat Plan - ${foName}`;
+    
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(title, 14, 15);
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    let tableY = 25; // Starting Y position for the table
+    let rowHeight = 8; // Row height for spacing
+    
+    doc.text("Sr. No.", 10, tableY);
+    doc.text("FO Name", 25, tableY);
+    doc.text("Date", 65, tableY);
+    doc.text("Indus ID", 95, tableY);
+    doc.text("Formatted ID", 125, tableY);
+    doc.text("Site ID", 155, tableY);
+    doc.text("Tower Type", 185, tableY);
+    
+    tableY += 5; // Move down after header
 
-            html2canvas(document.getElementById('tableContainer')).then(function(canvas) {
-                const imgData = canvas.toDataURL("image/png");
-                doc.addImage(imgData, "PNG", 10, 10, 190, 100);
-                doc.save(`${foName}_beat_plan.pdf`);
-            });
+    // Draw a separator line
+    doc.line(10, tableY, 200, tableY);
+    tableY += 5;
+
+    // Loop through table data and add to PDF
+    dataRows.forEach(row => {
+        if (tableY > 270) {  // Check for page break
+            doc.addPage();
+            tableY = 25;
+        }
+        
+        doc.text(row[0].toString(), 10, tableY);
+        doc.text(row[1], 25, tableY);
+        doc.text(row[2], 65, tableY);
+        doc.text(row[3], 95, tableY);
+        doc.text(row[4], 125, tableY);
+        doc.text(row[5], 155, tableY);
+        doc.text(row[6], 185, tableY);
+        
+        tableY += rowHeight;
+    });
+
+    doc.save(`${foName}_beat_plan.pdf`);
+}
+
         }
     </script>
 </body>
