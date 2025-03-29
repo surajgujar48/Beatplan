@@ -6,7 +6,7 @@
     <title>Create Beat Plan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <style>
         body {
             display: flex;
@@ -26,11 +26,6 @@
             max-height: 300px;
             overflow-y: auto;
         }
-        @media print {
-            body * { visibility: hidden; }
-            .container, .container * { visibility: visible; }
-            .container { position: absolute; left: 0; top: 0; }
-        }
     </style>
 </head>
 <body>
@@ -45,7 +40,6 @@
             <button type="button" id="unlockBtn" class="btn btn-secondary mb-3 d-none" onclick="unlockFields()">Edit FO Name</button>
             <div class="mb-3">
                 <label for="date" class="form-label">Date:</label>
-                <p style="color: red;">* Please change after 4 sites.</p>
                 <input type="date" id="date" class="form-control" onchange="handleDateChange()" required>
             </div>
             <div class="mb-3">
@@ -85,92 +79,10 @@
         let dataRows = [];
         let entryCount = 0;
         let currentDate = document.getElementById("date").value;
-
         document.getElementById("date").valueAsDate = new Date();
 
-        function lockFields() {
-            document.getElementById("fo_name").setAttribute("disabled", "true");
-            document.getElementById("lockBtn").classList.add("d-none");
-            document.getElementById("unlockBtn").classList.remove("d-none");
-        }
-
-        function unlockFields() {
-            document.getElementById("fo_name").removeAttribute("disabled");
-            document.getElementById("lockBtn").classList.remove("d-none");
-            document.getElementById("unlockBtn").classList.add("d-none");
-        }
-
-        function handleDateChange() {
-            const newDate = document.getElementById("date").value;
-            if (newDate !== currentDate) {
-                entryCount = 0;
-                currentDate = newDate;
-                dataRows = [];
-                document.getElementById("dataTable").innerHTML = '';
-            }
-        }
-
-        function addData() {
-            if (entryCount >= 24) {
-                alert("You have reached the maximum limit of 24 entries.");
-                return;
-            }
-            let foName = document.getElementById('fo_name').value;
-            let date = document.getElementById('date').value;
-            let indusId = document.getElementById('indus_id').value;
-            let formattedIndusId = "IN-" + indusId;
-            let siteId = document.getElementById('site_id').value;
-            let towerType = document.getElementById('tower_type').value;
-
-            if (!foName || !date || !indusId || !siteId || !towerType) {
-                alert("Please fill all required fields before adding data.");
-                return;
-            }
-            if (towerType === "RTT") {
-                alert("RTT sites cannot be added.");
-                return;
-            }
-            if (dataRows.some(row => row[3] === formattedIndusId)) {
-                alert("Duplicate Formatted Indus ID is not allowed.");
-                return;
-            }
-            dataRows.push([entryCount + 1, foName, date, indusId, formattedIndusId, siteId, towerType]);
-
-            let tableBody = document.getElementById("dataTable");
-            let newRow = tableBody.insertRow();
-            newRow.insertCell(0).innerText = entryCount + 1;
-            newRow.insertCell(1).innerText = foName;
-            newRow.insertCell(2).innerText = date;
-            newRow.insertCell(3).innerText = indusId;
-            newRow.insertCell(4).innerText = formattedIndusId;
-            newRow.insertCell(5).innerText = siteId;
-            newRow.insertCell(6).innerText = towerType;
-
-            entryCount++;
-            document.getElementById('indus_id').value = "";
-            document.getElementById('site_id').value = "";
-            document.getElementById('tower_type').value = "";
-        }
-
-        function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const foName = document.getElementById("fo_name").value || "Beat_Plan";
-            const doc = new jsPDF();
-
-            html2canvas(document.getElementById('tableContainer')).then(function(canvas) {
-                const imgData = canvas.toDataURL("image/png");
-                const imgWidth = 190;  
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                doc.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-                doc.save(`${foName}_beat_plan.pdf`);
-            });
-        }
-    </script>
-</body>
-</html>
-
-            1023959: { site: "MOHADI1", type: "GBT" },
+        let siteData = {          
+1023959: { site: "MOHADI1", type: "GBT" },
 1023960: { site: "Pawani (Vodafone)", type: "GBT" },
 1023961: { site: "BALLARPUR2", type: "GBT" },
 1023962: { site: "SINDHICOLONY1", type: "GBT" },
@@ -15261,10 +15173,37 @@
 3250614: { site: "Indira Nagar Joging Track", type: "GBT" }
 
         };
+        
+
+
+        function lockFields() {
+            document.getElementById("fo_name").setAttribute("disabled", "true");
+            document.getElementById("lockBtn").classList.add("d-none");
+            document.getElementById("unlockBtn").classList.remove("d-none");
+        }
+
+        function unlockFields() {
+            document.getElementById("fo_name").removeAttribute("disabled");
+            document.getElementById("lockBtn").classList.remove("d-none");
+            document.getElementById("unlockBtn").classList.add("d-none");
+        }
+
+        function handleDateChange() {
+            const newDate = document.getElementById("date").value;
+            if (newDate !== currentDate) {
+                entryCount = 0;
+                currentDate = newDate;
+                dataRows = [];
+                document.getElementById("dataTable").innerHTML = '';
+            }
+            document.getElementById("tableContainer").scrollTop = document.getElementById("tableContainer").scrollHeight;
+        }
+
         function autoFillSiteAndType() {
-            let indusId = document.getElementById('indus_id').value;
+            let indusId = document.getElementById('indus_id').value.trim();
             let siteField = document.getElementById('site_id');
             let typeField = document.getElementById('tower_type');
+
             if (siteData[indusId]) {
                 siteField.value = siteData[indusId].site;
                 typeField.value = siteData[indusId].type;
@@ -15272,51 +15211,33 @@
                 siteField.value = "";
                 typeField.value = "";
             }
-
         }
-        function handleDateChange() {
-    let newDate = document.getElementById("date").value;
-    currentDate = newDate;
-    
-    if (!allData[currentDate]) {
-        allData[currentDate] = [];
-    }
-
-    displayData(); // Refresh table data
-}
 
         function addData() {
             if (entryCount >= 24) {
                 alert("You have reached the maximum limit of 24 entries.");
                 return;
             }
-            if (entryCount > 0 && entryCount % 24 === 0) {
-                alert("You have added 4 entries. Please change the date before adding more.");
-                return;
-            }
+
             let foName = document.getElementById('fo_name').value;
             let date = document.getElementById('date').value;
             let indusId = document.getElementById('indus_id').value;
             let formattedIndusId = "IN-" + indusId;
             let siteId = document.getElementById('site_id').value;
             let towerType = document.getElementById('tower_type').value;
+
             if (!foName || !date || !indusId || !siteId || !towerType) {
                 alert("Please fill all required fields before adding data.");
                 return;
             }
-            if (towerType === "RTT") {
-                alert("RTT sites cannot be added.");
+
+            if (dataRows.some(row => row[3] === indusId)) {
+                alert("Duplicate Indus ID is not allowed.");
                 return;
             }
-            if (dataRows.some(row => row[3] === formattedIndusId)) {
-                alert("Duplicate Formatted Indus ID is not allowed.");
-                return;
-            }
-             if (dataRows.some(row => row[2] === date && row[3] === indusId)) {
-                alert("Duplicate Indus ID for the same date is not allowed.");
-                return;
-            }
-            dataRows.push([entryCount + 1,foName, date, indusId, formattedIndusId, siteId, towerType]);
+
+            dataRows.push([entryCount + 1, foName, date, indusId, formattedIndusId, siteId, towerType]);
+
             let tableBody = document.getElementById("dataTable");
             let newRow = tableBody.insertRow();
             newRow.insertCell(0).innerText = entryCount + 1;
@@ -15326,26 +15247,23 @@
             newRow.insertCell(4).innerText = formattedIndusId;
             newRow.insertCell(5).innerText = siteId;
             newRow.insertCell(6).innerText = towerType;
+
             entryCount++;
             document.getElementById('indus_id').value = "";
             document.getElementById('site_id').value = "";
             document.getElementById('tower_type').value = "";
         }
+
         function downloadPDF() {
-        const { jsPDF } = window.jspdf;
-        const foName = document.getElementById("fo_name").value || "Beat_Plan";
-        const doc = new jsPDF();
+            const { jsPDF } = window.jspdf;
+            const foName = document.getElementById("fo_name").value || "Beat_Plan";
+            const doc = new jsPDF();
 
-        // Capture full table including scrolled content
-        html2canvas(document.getElementById('tableContainer')).then(function(canvas) {
-            const imgData = canvas.toDataURL("image/png");
-            const imgWidth = 190;  // A4 width
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;  // Maintain aspect ratio
-
-            doc.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-            doc.save(`${foName}_beat_plan.pdf`);
-        });
-    }
+            html2canvas(document.getElementById('tableContainer')).then(function(canvas) {
+                const imgData = canvas.toDataURL("image/png");
+                doc.addImage(imgData, "PNG", 10, 10, 190, 100);
+                doc.save(`${foName}_beat_plan.pdf`);
+            });
         }
     </script>
 </body>
