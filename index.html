@@ -15306,6 +15306,27 @@
     doc.save(`${foName}_beat_plan.pdf`);
 }
 
+if (towerType === "RTT") {
+    alert("RTT sites cannot be added.");
+    return;
+}
+
+// Ensure no duplicate formatted Indus ID exists
+if (dataRows.some(row => row[4] === formattedIndusId)) {
+    alert("Duplicate Formatted Indus ID is not allowed.");
+    return;
+}
+
+// Ensure no duplicate Indus ID exists for the same date
+if (dataRows.some(row => row[2] === date && row[3] === indusId)) {
+    alert("Duplicate Indus ID for the same date is not allowed.");
+    return;
+}
+
+// Add the data after all checks pass
+dataRows.push([entryCount + 1, foName, date, indusId, formattedIndusId, siteId, towerType]);
+
+
         }
     </script>
 </body>
