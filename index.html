@@ -15286,13 +15286,21 @@
             document.getElementById('site_id').value = "";
             document.getElementById('tower_type').value = "";
         }
-        function downloadJPG() {
-            html2canvas(document.getElementById('tableContainer')).then(function(canvas) {
-                var link = document.createElement('a');
-                link.href = canvas.toDataURL('image/jpeg');
-                link.download = 'beat_plan.jpg';
-                link.click();
-            });
+        function downloadPDF() {
+        const { jsPDF } = window.jspdf;
+        const foName = document.getElementById("fo_name").value || "Beat_Plan";
+        const doc = new jsPDF();
+
+        // Capture full table including scrolled content
+        html2canvas(document.getElementById('tableContainer')).then(function(canvas) {
+            const imgData = canvas.toDataURL("image/png");
+            const imgWidth = 190;  // A4 width
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;  // Maintain aspect ratio
+
+            doc.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+            doc.save(`${foName}_beat_plan.pdf`);
+        });
+    }
         }
     </script>
 </body>
